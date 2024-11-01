@@ -1,0 +1,25 @@
+[package]
+name = "classroom"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+opencv = "0.93.3"
+egui = "0.23"
+eframe = "0.23"
+rfd = "0.13.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+cargo-bundle = "0.6.0"
+
+[package.metadata.bundle]
+name = "Frame Classifier"
+identifier = "com.linuseing.frameclassifier"
+version = "1.0.0"
+resources = []
+copyright = "Copyright (c) Your Name 2024"
+category = "Video"
+short_description = "Frame Classifier Application"
+osx_minimum_system_version = "10.13"
+plist_extra = { "LSUIElement" = false }
+icon = ["MyIcon.icns"]
