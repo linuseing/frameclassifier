@@ -2,7 +2,6 @@ build-aarch64:
 	cargo bundle --target aarch64-apple-darwin --release
 
 build-app: create-icon build-aarch64
-	cp -r "target/aarch64-apple-darwin/release/bundle/osx/Frame Classifier.app" .
 
 create-icon:
 	mkdir icon.iconset
