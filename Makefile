@@ -21,7 +21,7 @@ create-icon:
 
 create-dmg: build-app
 	mkdir -p "tmp-dmg"
-	cp -r "Frame Classifier.app" "tmp-dmg/"
+	cp -r "target/aarch64-apple-darwin/release/bundle/osx/Frame Classifier.app" "tmp-dmg/"
 	ln -s /Applications "tmp-dmg/Applications"
 	hdiutil create -volname "Frame Classifier" -srcfolder "tmp-dmg" -ov -format UDZO "Frame Classifier.dmg"
 	# Clean up

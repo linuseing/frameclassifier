@@ -22,4 +22,4 @@ category = "Video"
 short_description = "Frame Classifier Application"
 osx_minimum_system_version = "10.13"
 plist_extra = { "LSUIElement" = false }
-icon = ["MyIcon.icns"]
+icon = ["icon.icns"]
