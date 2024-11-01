@@ -16,5 +16,10 @@
     <string>frame-classifier</string>
     <key>NSHighResolutionCapable</key>
     <true/>
+    <key>LSEnvironment</key>
+    <dict>
+        <key>DYLD_LIBRARY_PATH</key>
+        <string>@executable_path/../Frameworks</string>
+    </dict>
 </dict>
 </plist>

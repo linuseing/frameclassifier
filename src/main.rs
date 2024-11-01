@@ -2,7 +2,7 @@ use eframe::{egui, App, CreationContext};
 use opencv::{core, imgcodecs, imgproc, prelude::*, videoio};
 use rfd::FileDialog;
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::time::{Duration, Instant};
 
 struct VideoApp {
@@ -37,40 +37,42 @@ impl Default for VideoApp {
 
 impl App for VideoApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        ctx.input(|i| {
-            if i.key_pressed(egui::Key::Space) {
-                self.is_playing = !self.is_playing;
-            } else if i.key_pressed(egui::Key::ArrowRight) {
-                self.advance_frame();
-                self.last_frame_time = Instant::now();
-            } else if i.key_pressed(egui::Key::ArrowLeft) {
-                self.previous_frame();
-                self.last_frame_time = Instant::now();
-            } else if i.key_pressed(egui::Key::Escape) {
-                self.is_playing = false;
-                self.capture = None;
-                self.video_path = None;
-            } else if i.key_pressed(egui::Key::Q) {
-                self.is_playing = false;
-                std::process::exit(0);
-            } else if i.key_pressed(egui::Key::S) {
-                if let Some(capture) = &self.capture {
-                    if let Ok(current_frame) = capture.get(videoio::CAP_PROP_POS_FRAMES) {
-                        self.start_frame = Some(current_frame);
+        if !self.show_label_popup {
+            ctx.input(|i| {
+                if i.key_pressed(egui::Key::Space) {
+                    self.is_playing = !self.is_playing;
+                } else if i.key_pressed(egui::Key::ArrowRight) {
+                    self.advance_frame();
+                    self.last_frame_time = Instant::now();
+                } else if i.key_pressed(egui::Key::ArrowLeft) {
+                    self.previous_frame();
+                    self.last_frame_time = Instant::now();
+                } else if i.key_pressed(egui::Key::Escape) {
+                    self.is_playing = false;
+                    self.capture = None;
+                    self.video_path = None;
+                } else if i.key_pressed(egui::Key::Q) {
+                    self.is_playing = false;
+                    std::process::exit(0);
+                } else if i.key_pressed(egui::Key::S) {
+                    if let Some(capture) = &self.capture {
+                        if let Ok(current_frame) = capture.get(videoio::CAP_PROP_POS_FRAMES) {
+                            self.start_frame = Some(current_frame);
+                        }
+                    }
+                } else if i.key_pressed(egui::Key::E) {
+                    if let Some(capture) = &self.capture {
+                        if let Ok(current_frame) = capture.get(videoio::CAP_PROP_POS_FRAMES) {
+                            self.end_frame = Some(current_frame);
+                        }
+                    }
+                } else if i.key_pressed(egui::Key::O) {
+                    if let Some(path) = FileDialog::new().add_filter("Video", &["mp4", "avi", "mov"]).pick_file() {
+                        self.load_video(path);
                     }
                 }
-            } else if i.key_pressed(egui::Key::E) {
-                if let Some(capture) = &self.capture {
-                    if let Ok(current_frame) = capture.get(videoio::CAP_PROP_POS_FRAMES) {
-                        self.end_frame = Some(current_frame);
-                    }
-                }
-            } else if i.key_pressed(egui::Key::O) {
-                if let Some(path) = FileDialog::new().add_filter("Video", &["mp4", "avi", "mov"]).pick_file() {
-                    self.load_video(path);
-                }
-            }
-        });
+            });
+        }
 
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.heading("Video Playback");
@@ -194,7 +196,7 @@ impl App for VideoApp {
 
 impl VideoApp {
     fn load_video(&mut self, path: PathBuf) {
-        if let Ok(mut capture) = videoio::VideoCapture::from_file(&path.to_string_lossy(), videoio::CAP_ANY) {
+        if let Ok(capture) = videoio::VideoCapture::from_file(&path.to_string_lossy(), videoio::CAP_ANY) {
             if let Ok(true) = capture.is_opened() {
                 self.video_path = Some(path);
                 self.capture = Some(capture);
@@ -258,7 +260,7 @@ impl VideoApp {
                 if capture.read(&mut frame).unwrap() && !frame.empty() {
                     let frame_filename = format!("{}-{}_frame_{:05}.png", video_stem, self.label_input, frame_number);
                     let frame_path = export_dir.join(&frame_filename);
-                    imgcodecs::imwrite(frame_path.to_str().unwrap(), &frame, &opencv::types::VectorOfi32::new()).unwrap();
+                    imgcodecs::imwrite(frame_path.to_str().unwrap(), &frame, &opencv::core::Vector::<i32>::new()).unwrap();
                     
                     csv_content.push_str(&format!("{},1\n", frame_filename));
                 }
@@ -275,7 +277,7 @@ impl VideoApp {
 
 fn main() {
     let options = eframe::NativeOptions::default();
-    eframe::run_native(
+    let _ =eframe::run_native(
         "Video Playback",
         options,
         Box::new(|_cc: &CreationContext| Box::new(VideoApp::default())),
