@@ -41,7 +41,10 @@ impl View for LabelView {
             video_ui(ui, app, self);
             label_ui(ui, app, self);
             label_popup(ui, ctx, self, app);
-            controls(ctx, self);
+            let next = controls(ctx, self);
+            if next.is_some() {
+                next_view = next;
+            }
         });
         next_view
     }
@@ -63,7 +66,8 @@ impl LabelView {
     }
 }
 
-fn controls(ctx: &egui::Context, state: &mut LabelView) {
+fn controls(ctx: &egui::Context, state: &mut LabelView) -> Option<Box<dyn View>> {
+    let mut next_view = None;
     if !state.show_label_popup {
         ctx.input(|i| {
             if i.key_pressed(egui::Key::Space) {
@@ -75,7 +79,7 @@ fn controls(ctx: &egui::Context, state: &mut LabelView) {
                 let step = if i.modifiers.shift { 10 } else { 1 };
                 state.previous_frame(step);
             } else if i.key_pressed(egui::Key::Escape) {
-                state.is_playing = false;
+                next_view = Some(Box::new(HomeView::new()) as Box<dyn View>);
             } else if i.key_pressed(egui::Key::S) {
                 let current_frame = state.capture.get(videoio::CAP_PROP_POS_FRAMES).unwrap() as u32;
                 if let Some(end_frame) = state.current_end_frame {
@@ -101,6 +105,7 @@ fn controls(ctx: &egui::Context, state: &mut LabelView) {
             }
         });
     }
+    next_view
 }
 
 pub fn playback_ui(ui: &mut egui::Ui, state: &mut LabelView) -> Option<Box<dyn View>> {
